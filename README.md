@@ -1,6 +1,18 @@
+<p style="text-align: center;">
+<img src="docs/svelte-popover.svg">
+</p>
+
 # svelte-smooth-popover
 
 A robust, unstyled popover component for Svelte with a customizable smooth/sharp caret.
+
+<p style="text-align: center;">
+<img src="https://i.imgur.com/jxpdbmG.png">
+</p>
+
+## Docs/playground
+
+https://svelte-smooth-popover.jrmy.dev
 
 ## Installation
 
@@ -11,6 +23,10 @@ npm i svelte-smooth-popover
 ## Usage
 
 ```html
+<script>
+	import { Popover } from 'svelte-smooth-popover';
+</script>
+
 <button>
 	Example
 	<Popover>
