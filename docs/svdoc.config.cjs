@@ -5,7 +5,7 @@ const config = {
 	primary: '#FF3E00',
 	external: [
 		{
-			href: 'https://github.com/AskingQuestions/svelte-popover',
+			href: 'https://github.com/AskingQuestions/svelte-smooth-popover',
 			text: 'GitHub',
 			icon: ':github'
 		}
