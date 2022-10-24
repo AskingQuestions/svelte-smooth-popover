@@ -185,6 +185,11 @@
 	 */
 	export let zIndex = '';
 
+	/**
+	 * Switch to use "fixed" positioning if your popover is not working right
+	 */
+	export let useFixedPositioning = false;
+
 	$: {
 		caretBg,
 			caretCurveAmount,
@@ -407,8 +412,13 @@
 			y = Math.floor(forcePosition.y);
 		}
 
-		dropdownEl.style.left = `${x}px`;
-		dropdownEl.style.top = `${y}px`;
+		if (useFixedPositioning) {
+			dropdownEl.style.left = `${x}px`;
+			dropdownEl.style.top = `${y}px`;
+		} else {
+			dropdownEl.style.left = `${x + window.scrollX}px`;
+			dropdownEl.style.top = `${y + window.scrollY}px`;
+		}
 
 		if (zIndex != '') {
 			dropdownEl.style.setProperty('--popover-z-index', zIndex);
@@ -794,7 +804,7 @@
 		<div
 			transition:transitionFn
 			use:portal
-			class={'popover ' + ($$props.class || '')}
+			class={'popover ' + (useFixedPositioning ? 'popover-fixed ' : '') + ($$props.class || '')}
 			bind:this={dropdownEl}
 		>
 			<svg
@@ -835,9 +845,13 @@
 	}
 
 	.popover {
-		position: fixed;
+		position: absolute;
 		display: inline-block;
 		z-index: var(--popover-z-index, 1060);
+	}
+
+	.popover.popover-fixed {
+		position: fixed;
 	}
 
 	.popover-caret {
