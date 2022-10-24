@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="36" height="36" viewBox="0 0 36 36">
+  <defs>
+    <filter id="Rectangle_15" x="-1" y="3" width="24" height="24" filterUnits="userSpaceOnUse">
+      <feOffset dy="3" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="Rectangle_16" x="14" y="16" width="24" height="24" filterUnits="userSpaceOnUse">
+      <feOffset dy="3" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="3" result="blur-2"/>
+      <feFlood flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur-2"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <clipPath id="clip-graph">
+      <rect width="36" height="36"/>
+    </clipPath>
+  </defs>
+  <g id="graph" clip-path="url(#clip-graph)">
+    <g id="Group_32" data-name="Group 32" transform="translate(-342 -191)">
+      <path id="Path_104" data-name="Path 104" d="M2338.179,198.844c14.64-.479.051,14.03,14.683,13.644" transform="translate(-1985.021 4)" fill="none" stroke="#707070" stroke-width="1"/>
+      <g transform="matrix(1, 0, 0, 1, 342, 191)" filter="url(#Rectangle_15)">
+        <rect id="Rectangle_15-2" data-name="Rectangle 15" width="6" height="6" rx="1" transform="translate(8 9)" fill="#707070"/>
+      </g>
+      <g transform="matrix(1, 0, 0, 1, 342, 191)" filter="url(#Rectangle_16)">
+        <rect id="Rectangle_16-2" data-name="Rectangle 16" width="6" height="6" rx="1" transform="translate(23 22)" fill="#c953dd"/>
+      </g>
+    </g>
+  </g>
+</svg>

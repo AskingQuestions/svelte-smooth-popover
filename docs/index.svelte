@@ -5,6 +5,8 @@
 	import Graphic from '$lib/graphic.svelte';
 	import { onDestroy, onMount } from 'svelte';
 
+	import { fade } from 'svelte/transition';
+
 	let x = 0;
 	let y = 0;
 
@@ -13,7 +15,7 @@
 	let mouseIn = false;
 
 	let popcommon = {
-		hover: true,
+		showOnHover: true,
 		borderRadius: 6,
 		avoidOverlap: true,
 		align: 'left-middle' as Alignment,
@@ -93,6 +95,13 @@
 		align: 'top-center' as Alignment,
 		alignAnchor: 'auto' as Alignment
 	};
+
+	let customTrigger = {
+		showOnHover: false,
+		hideOnExternalClick: false,
+		showOnClick: false,
+		open: true
+	};
 </script>
 
 <h1 class="text-center">
@@ -134,6 +143,9 @@
     </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
   </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">Popover</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
 </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span></code></pre>`}
+
+<h2 class="text-2xl m-2">Caret customization</h2>
+
 <div
 	class=" flex flex-row bg-[rgb(18,19,20)] p-4 mt-2 mx-auto max-w-[55rem] min-h-[20rem] flex items-center justify-center relative"
 >
@@ -153,9 +165,7 @@
 					<div
 						style="border-radius: {custom.borderRadius}px;"
 						class="p-10 flex items-center justify-center min-w-[200px] bg-gray-bubble text-black"
-					>
-						<Graphic icon="sms" />
-					</div>
+					/>
 				</Popover>
 			</button>
 		</div>
@@ -182,7 +192,7 @@
 			class="mt-4"
 			type="range"
 			min="0"
-			max="100"
+			max="40"
 			step="1"
 			bind:value={custom.borderRadius}
 		/>
@@ -347,8 +357,10 @@
 	</div>
 </div>
 
+<h2 class="text-2xl" style="margin-top: 2rem">Alignment</h2>
+
 <div
-	class=" flex flex-row bg-[rgb(18,19,20)] p-4 mt-2 mx-auto max-w-[55rem] min-h-[20rem] flex items-center justify-center relative"
+	class=" flex flex-row bg-[rgb(18,19,20)] p-4 mt-2 mx-auto max-w-[55rem] min-h-[27rem] flex items-center justify-center relative"
 >
 	<div class="flex-1 flex items-center justify-center self-stretch">
 		<div>
@@ -356,13 +368,11 @@
 				class="bg-gray min-w-[120px] min-h-[150px] flex items-center justify-center rounded-md"
 			>
 				<Graphic icon="info" />
-				<Popover {...custom} caretBg="#464646" constrainToWindow={false}>
+				<Popover {...custom} caretBg="#464646" constrainToWindow={true}>
 					<div
 						style="border-radius: {custom.borderRadius}px;"
 						class="p-10 flex items-center justify-center min-w-[200px] bg-gray-bubble text-black"
-					>
-						<Graphic icon="sms" />
-					</div>
+					/>
 				</Popover>
 			</button>
 		</div>
@@ -410,9 +420,7 @@
 		</select>
 
 		<label style="font-family: monospace" class="self-start ml-6 mt-2 -mb-2" for="alignAnchor">
-			<Popover {...custom} {...popcommon}
-				>Two-step alignment of the anchor target (you probably don't need to use this)</Popover
-			>
+			<Popover {...custom} {...popcommon}>Two-step alignment of the anchor target</Popover>
 			<span class="text-[lightblue]">alignAnchor</span>={'{'}<span class="text-[orange]">"</span
 			><input
 				size="16"
@@ -446,7 +454,81 @@
 	</div>
 </div>
 
+<h2 class="text-2xl" style="margin-top: 2rem">Triggers</h2>
+
+<div
+	class=" flex flex-row bg-[rgb(18,19,20)] p-4 mt-2 mx-auto max-w-[55rem] min-h-[27rem] flex items-center justify-center relative"
+>
+	<div class="flex-1 flex items-center justify-center self-stretch">
+		<div>
+			<button
+				class="bg-gray min-w-[120px] min-h-[150px] flex items-center justify-center rounded-md"
+			>
+				<Graphic icon="info" />
+				<Popover {...custom} {...customTrigger} caretBg="#464646" constrainToWindow={true}>
+					<div
+						style="border-radius: {custom.borderRadius}px;"
+						class="p-10 flex items-center justify-center min-w-[200px] bg-gray-bubble text-black"
+					/>
+				</Popover>
+			</button>
+		</div>
+	</div>
+	<div
+		class="bg-gray rounded-lg top-4 right-4 bottom-4 min-w-[17rem] flex items-center flex-col self-stretch"
+	>
+		<div class="text-white self-start ml-2">
+			&lt;<span class="text-[#4ec9b0]">Popover</span>
+		</div>
+		<label style="font-family: monospace" class="self-start ml-6 mt-2 -mb-2" for="open">
+			<Popover {...custom} {...popcommon}>Simple show/hide</Popover>
+			<span class="text-[lightblue]">open</span>={`{${customTrigger.open}}`}
+		</label>
+		<input id="open" class="mt-4" type="checkbox" bind:checked={customTrigger.open} />
+
+		<label style="font-family: monospace" class="self-start ml-6 mt-2 -mb-2" for="showOnHover">
+			<Popover {...custom} {...popcommon}
+				>Should the popover show when hovering over the anchor?</Popover
+			>
+			<span class="text-[lightblue]">showOnHover</span>={`{${customTrigger.showOnHover}}`}
+		</label>
+		<input id="showOnHover" class="mt-4" type="checkbox" bind:checked={customTrigger.showOnHover} />
+
+		<label style="font-family: monospace" class="self-start ml-6 mt-2 -mb-2" for="showOnClick">
+			<Popover {...custom} {...popcommon}
+				>Should the popover toggle when clicking the anchor?</Popover
+			>
+			<span class="text-[lightblue]">showOnClick</span>={`{${customTrigger.showOnClick}}`}
+		</label>
+		<input id="showOnClick" class="mt-4" type="checkbox" bind:checked={customTrigger.showOnClick} />
+
+		<label
+			style="font-family: monospace"
+			class="self-start ml-6 mt-2 -mb-2"
+			for="hideOnExternalClick"
+		>
+			<Popover {...custom} {...popcommon}
+				>Should the popover hide when clicking outside the anchor and popover?</Popover
+			>
+			<span class="text-[lightblue]">hideOnExternalClick</span
+			>={`{${customTrigger.hideOnExternalClick}}`}
+		</label>
+		<input
+			id="hideOnExternalClick"
+			class="mt-4"
+			type="checkbox"
+			bind:checked={customTrigger.hideOnExternalClick}
+		/>
+
+		<div class="text-white self-start ml-6">/&gt;</div>
+	</div>
+</div>
+
 <style>
+	:root {
+		--popover-z-index: 10;
+	}
+
 	.popover-anim:hover {
 		animation: anim-2 alternate 1s ease-in-out infinite;
 		color: var(--primary);

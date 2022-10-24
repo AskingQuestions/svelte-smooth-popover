@@ -10,7 +10,9 @@
 </script>
 
 <script lang="ts">
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onDestroy, onMount, tick, createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
 	function mount(node: HTMLElement) {
 		const host = document.body;
@@ -57,11 +59,22 @@
 					.join('-')
 			: alignAnchor;
 
+	/**
+	 * Offset to apply to the popover relative to the anchor
+	 */
 	export let offset = 5;
+
+	/**
+	 * Target width of the caret
+	 */
 	export let caretWidth = 15;
+
+	/**
+	 * Target height of the caret. Default: offset - 2px
+	 */
 	export let caretHeight: number | null = null;
 
-	$: caretHeightReal = caretHeight ? caretHeight : offset;
+	$: caretHeightReal = caretHeight ? caretHeight : offset - 2;
 
 	export let caretBg = 'white';
 
@@ -78,13 +91,41 @@
 	/**
 	 * Show the popover on hover?
 	 */
-	export let hover = false;
+	export let showOnHover = false;
 
 	let hoverOpen = false;
 
+	/**
+	 * Should the popover hide when the user clicks outside of the popover or anchor?
+	 */
+	export let hideOnExternalClick = false;
+
+	/**
+	 * Show the popover on anchor click?
+	 */
+	export let showOnClick = false;
+
+	let clickOpen = false;
+
+	/**
+	 * Basic {#if} to show/hide the popover
+	 */
 	export let open = true;
 
-	$: openReal = hover ? hoverOpen : open;
+	$: openReal = showOnClick || showOnHover ? hoverOpen || clickOpen : open;
+
+	/**
+	 * Svelte transtion to use when showing/hiding the popover
+	 */
+	export let transition: any = null;
+
+	function transitionFn(node: HTMLElement, params: any) {
+		if (transition) {
+			return transition(node, params);
+		} else {
+			return null;
+		}
+	}
 
 	/**
 	 * Should the popover react to css animations/transitions?
@@ -94,7 +135,7 @@
 	export let watchAnimations = false;
 
 	/**
-	 * Should the popover stay within the window bounds?
+	 * Should the popover move to stay within the window bounds?
 	 */
 	export let constrainToWindow = true;
 
@@ -112,13 +153,37 @@
 	 * Should the caret "submerge" (hide) when it nears a corner?
 	 */
 	export let caretSubmerge = false;
+
 	/**
 	 * Number of steps to take around corners. Increase/decrease this if you notice cracks between the caret and the popover
 	 */
 	export let caretResolution = 0;
+
+	/**
+	 * Set this to the border-radius of the main popover background element.
+	 *
+	 * This is used to calculate positioning and clipping for the caret around corners.
+	 */
 	export let borderRadius = 6.75;
 
+	/**
+	 * Distance to maintain from the edge of the window
+	 */
 	export let windowMargin = 10;
+
+	/**
+	 * Override the z-index of the popover
+	 *
+	 * Note: You can also apply a custom z-index globally by setting the `--popover-z-index` css variable in :root {}
+	 *
+	 * e.g.
+	 * ```css
+	 * :root {
+	 * 	--popover-z-index: 1000;
+	 * }
+	 * ```
+	 */
+	export let zIndex = '';
 
 	$: {
 		caretBg,
@@ -141,7 +206,9 @@
 			forcePosition,
 			caretSubmerge,
 			open,
-			hover;
+			showOnHover,
+			showOnClick,
+			zIndex;
 
 		calcPosition(true);
 	}
@@ -188,10 +255,10 @@
 	function getFlooredBoundingClientRect(el: HTMLElement) {
 		const rect = el.getBoundingClientRect();
 		return {
-			left: Math.floor(rect.left),
-			top: Math.floor(rect.top),
-			width: Math.floor(rect.width),
-			height: Math.floor(rect.height)
+			left: rect.left,
+			top: rect.top,
+			width: rect.width,
+			height: rect.height
 		};
 	}
 
@@ -264,15 +331,15 @@
 
 		function solveContain(rect: Rect) {
 			if (x < rect.left) {
-				x = rect.left;
+				x = Math.min(rect.left, anchorRect.left + anchorRect.width);
 			} else if (x + popRect.width > rect.left + rect.width) {
-				x = rect.left + rect.width - popRect.width;
+				x = Math.max(rect.left + rect.width - popRect.width, anchorRect.left - popRect.width);
 			}
 
 			if (y < rect.top) {
-				y = rect.top;
+				y = Math.min(rect.top, anchorRect.top + anchorRect.height);
 			} else if (y + popRect.height > rect.top + rect.height) {
-				y = rect.top + rect.height - popRect.height;
+				y = Math.max(rect.top + rect.height - popRect.height, anchorRect.top - popRect.height);
 			}
 		}
 
@@ -288,13 +355,13 @@
 					if (x < rect.left) {
 						x = rect.left - popRect.width;
 					} else if (x + popRect.width > rect.left + rect.width) {
-						x = rect.left + rect.width;
+						x = rect.left + rect.width + offset / 2;
 					}
 				} else if (axis == 'y') {
 					if (y < rect.top + rect.height) {
 						y = rect.top - popRect.height;
 						if (y < offset) {
-							y = rect.top + rect.height;
+							y = rect.top + rect.height + offset / 2;
 						}
 					} else if (y + popRect.height > rect.top + rect.height) {
 						y = rect.top + rect.height;
@@ -342,6 +409,10 @@
 
 		dropdownEl.style.left = `${x}px`;
 		dropdownEl.style.top = `${y}px`;
+
+		if (zIndex != '') {
+			dropdownEl.style.setProperty('--popover-z-index', zIndex);
+		}
 
 		let newDropRect = getFlooredBoundingClientRect(dropdownEl);
 
@@ -432,7 +503,12 @@
 		function lengthToBoxPoint(v: number) {
 			let rect = dropdownPointerRectEl;
 			if (!rect) return { x: 0, y: 0 };
-			let len = rect.getTotalLength();
+			let len = 0;
+			try {
+				len = rect.getTotalLength();
+			} catch (e) {
+				return { x: 0, y: 0 };
+			}
 
 			v = v % len;
 			if (v < 0) v += len;
@@ -447,7 +523,12 @@
 
 			let min = Infinity;
 			let closestPoint = 0;
-			let len = rect.getTotalLength();
+			let len = 0;
+			try {
+				len = rect.getTotalLength();
+			} catch (e) {
+				return 0;
+			}
 
 			for (let i = 0; i < resolution; i++) {
 				let p2 = rect.getPointAtLength((i / resolution) * len);
@@ -596,14 +677,39 @@
 	}
 
 	function handleParentMouseEnter() {
-		if (hover) {
+		if (showOnHover) {
 			hoverOpen = true;
+			dispatch('open');
 		}
 	}
 
 	function handleParentMouseLeave() {
-		if (hover) {
+		if (showOnHover) {
 			hoverOpen = false;
+			dispatch('open');
+		}
+	}
+
+	function handleParentMouseClick() {
+		if (showOnClick) {
+			clickOpen = !clickOpen;
+			clickOpen ? dispatch('open') : dispatch('close');
+		}
+	}
+
+	function handleDocumentClick(e: MouseEvent) {
+		if (hideOnExternalClick && clickOpen) {
+			if (dropdownEl && parentEl) {
+				if (
+					e.target !== dropdownEl &&
+					!dropdownEl.contains(e.target as Node) &&
+					e.target !== parentEl &&
+					!parentEl.contains(e.target as Node)
+				) {
+					clickOpen = false;
+					dispatch('close');
+				}
+			}
 		}
 	}
 
@@ -652,7 +758,10 @@
 			if (parentEl) {
 				parentEl.addEventListener('mouseenter', handleParentMouseEnter);
 				parentEl.addEventListener('mouseleave', handleParentMouseLeave);
+				parentEl.addEventListener('click', handleParentMouseClick);
 			}
+
+			document.addEventListener('click', handleDocumentClick);
 
 			window.addEventListener('scroll', () => calcPosition());
 			window.addEventListener('resize', () => calcPosition());
@@ -666,7 +775,10 @@
 			if (parentEl) {
 				parentEl.removeEventListener('mouseenter', handleParentMouseEnter);
 				parentEl.removeEventListener('mouseleave', handleParentMouseLeave);
+				parentEl.removeEventListener('click', handleParentMouseClick);
 			}
+
+			document.removeEventListener('click', handleDocumentClick);
 
 			killFrameLoop = true;
 			window.removeEventListener('resize', () => calcPosition());
@@ -679,7 +791,12 @@
 
 <span bind:this={childSlotEl}>
 	{#if openReal}
-		<div use:portal class={'popover ' + ($$props.class || '')} bind:this={dropdownEl}>
+		<div
+			transition:transitionFn
+			use:portal
+			class={'popover ' + ($$props.class || '')}
+			bind:this={dropdownEl}
+		>
 			<svg
 				width="0"
 				height="0"
@@ -720,7 +837,7 @@
 	.popover {
 		position: fixed;
 		display: inline-block;
-		z-index: 1000;
+		z-index: var(--popover-z-index, 1060);
 	}
 
 	.popover-caret {
