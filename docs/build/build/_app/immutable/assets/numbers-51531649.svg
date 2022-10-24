@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="36" height="36" viewBox="0 0 36 36">
+  <defs>
+    <clipPath id="clip-numbers">
+      <rect width="36" height="36"/>
+    </clipPath>
+  </defs>
+  <g id="numbers" clip-path="url(#clip-numbers)">
+    <g id="Group_35" data-name="Group 35" transform="translate(-342 -191)">
+      <text id="_3" data-name="3" transform="translate(354 219)" fill="#c953dd" font-size="6" font-family="Roboto-Regular, Roboto" letter-spacing="0.013em"><tspan x="0" y="0">3</tspan></text>
+      <text id="_2" data-name="2" transform="translate(363 213)" fill="#c953dd" font-size="9" font-family="Roboto-Regular, Roboto" letter-spacing="0.013em"><tspan x="0" y="0">2</tspan></text>
+      <text id="_1" data-name="1" transform="translate(353 208)" fill="#c953dd" font-size="13" font-family="Roboto-Regular, Roboto" letter-spacing="0.013em"><tspan x="0" y="0">1</tspan></text>
+    </g>
+  </g>
+</svg>
