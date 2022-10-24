@@ -1,0 +1,21 @@
+diff --git a/node_modules/@sveltejs/kit/src/core/sync/write_client_manifest.js b/node_modules/@sveltejs/kit/src/core/sync/write_client_manifest.js
+index 542e65d..da165c4 100644
+--- a/node_modules/@sveltejs/kit/src/core/sync/write_client_manifest.js
++++ b/node_modules/@sveltejs/kit/src/core/sync/write_client_manifest.js
+@@ -20,14 +20,14 @@ export function write_client_manifest(config, manifest_data, output) {
+ 
+ 		if (node.shared) {
+ 			declarations.push(
+-				`import * as shared from ${s(relative(`${output}/nodes`, node.shared))};`,
++				`import * as shared from ${s("./" + relative(`${output}/nodes`, node.shared))};`,
+ 				`export { shared };`
+ 			);
+ 		}
+ 
+ 		if (node.component) {
+ 			declarations.push(
+-				`export { default as component } from ${s(relative(`${output}/nodes`, node.component))};`
++				`export { default as component } from ${s("./" + relative(`${output}/nodes`, node.component))};`
+ 			);
+ 		}
+ 
