@@ -707,6 +707,34 @@
 		}
 	}
 
+	function isElementInPopover(el: HTMLElement) {
+		let directDescendant = el === dropdownEl || dropdownEl.contains(el);
+
+		if (directDescendant) {
+			return true;
+		}
+
+		// Resolve popover chain
+		let popoverParent = el.closest('[data-popover-id]') as HTMLElement;
+		while (popoverParent) {
+			let popoverAnchor = document.querySelector(
+				"[data-popover-anchor-id='" + popoverParent.dataset.popoverId + "']"
+			);
+
+			if (popoverAnchor === dropdownEl || dropdownEl.contains(popoverAnchor)) {
+				return true;
+			}
+
+			if (popoverAnchor) {
+				popoverParent = popoverAnchor.closest('[data-popover-id]');
+			} else {
+				popoverParent = null;
+			}
+		}
+
+		return false;
+	}
+
 	function handleDocumentClick(e: MouseEvent) {
 		if (hideOnExternalClick && clickOpen) {
 			if (dropdownEl && parentEl) {
@@ -714,7 +742,8 @@
 					e.target !== dropdownEl &&
 					!dropdownEl.contains(e.target as Node) &&
 					e.target !== parentEl &&
-					!parentEl.contains(e.target as Node)
+					!parentEl.contains(e.target as Node) &&
+					!isElementInPopover(e.target as HTMLElement)
 				) {
 					clickOpen = false;
 					dispatch('close');
@@ -751,6 +780,15 @@
 		let killFrameLoop = false;
 
 		onMount(() => {
+			if (!(window as any).popover_elements) {
+				(window as any).popover_elements = new Map();
+			}
+
+			(window as any).popover_elements.set(uid, {
+				parentEl,
+				dropdownEl
+			});
+
 			function frameLoop() {
 				if (killFrameLoop) {
 					return;
@@ -799,13 +837,14 @@
 	}
 </script>
 
-<span bind:this={childSlotEl}>
+<span bind:this={childSlotEl} data-popover-anchor-id={uid}>
 	{#if openReal}
 		<div
 			transition:transitionFn
 			use:portal
 			class={'popover ' + (useFixedPositioning ? 'popover-fixed ' : '') + ($$props.class || '')}
 			bind:this={dropdownEl}
+			data-popover-id={uid}
 		>
 			<svg
 				width="0"
