@@ -1,4 +1,4 @@
 // Reexport your entry components here
-import Popover from './Popover.svelte';
+import Popover, { type Alignment } from './Popover.svelte';
 
-export { Popover };
+export { Popover, type Alignment };
