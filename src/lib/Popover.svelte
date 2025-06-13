@@ -426,7 +426,10 @@
 
 		let newDropRect = getFlooredBoundingClientRect(dropdownEl);
 
-		let br = Math.min(borderRadius, newDropRect.width / 2 - 1, newDropRect.height / 2 - 1);
+		let br = Math.max(
+			0,
+			Math.min(borderRadius, newDropRect.width / 2 - 1, newDropRect.height / 2 - 1)
+		);
 
 		dropdownPointerRectEl?.setAttribute('x', `0px`);
 		dropdownPointerRectEl?.setAttribute('y', `0px`);
@@ -523,7 +526,11 @@
 			v = v % len;
 			if (v < 0) v += len;
 			// With border radius
-			return rect.getPointAtLength(v) || { x: 0, y: 0 };
+			try {
+				return rect.getPointAtLength(v);
+			} catch (error) {
+				return { x: 0, y: 0 };
+			}
 		}
 
 		function boxPointToLength(p: { x: number; y: number }) {
@@ -541,7 +548,12 @@
 			}
 
 			for (let i = 0; i < resolution; i++) {
-				let p2 = rect.getPointAtLength((i / resolution) * len);
+				let p2: { x: number; y: number };
+				try {
+					p2 = rect.getPointAtLength((i / resolution) * len);
+				} catch (error) {
+					p2 = { x: 0, y: 0 };
+				}
 				let dist = Math.sqrt((p.x - p2.x) ** 2 + (p.y - p2.y) ** 2);
 				if (dist < min) {
 					min = dist;
